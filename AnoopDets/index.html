@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BlockChain</title>
+
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+
+        <h1>Smart Contract on Ethereum</h1>
+
+        <h2 id="instructor"></h2>
+
+        <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+
+        <label for="name" class="col-lg-2 control-label">Name :</label>
+        <input id="name" type="text">
+
+        <label for="name" class="col-lg-2 control-label">Age : </label>
+        <input id="age" type="text">
+
+        <button id="button">Submit ...</button>
+
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+       if(typeof web3 !== 'undefined'){
+           web3 = new Web3(web3.currentProvider);
+        } else {
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+        }
+
+        web3.eth.defaultAccount = web3.eth.accounts[1];
+        //web3.eth.defaultAccount = '0x5580fa9353cbafb466afba79a0940ad3b4505c8d';
+        //0x63935a531f2dcdd63d2c452e58b01199e99bd89f
+        //0x5b120d9d2d3dff108dbf8ac36413c5d16a289da1
+
+        var AnoopContract = web3.eth.contract([
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "age",
+				"type": "uint256"
+			}
+		],
+		"name": "Detailer",
+		"type": "event"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_fname",
+				"type": "string"
+			},
+			{
+				"name": "_age",
+				"type": "uint256"
+			}
+		],
+		"name": "setDets",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getDets",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+])
+
+    var AnoopDets = AnoopContract.at('0x965cb17755211b2a7cb590b023ef21bf5c480aa0');
+    console.log (AnoopDets);
+
+    var detailerEvent = AnoopDets.Detailer();
+
+  //  AnoopDets.getDets(function (error, result) {
+  //      if (!error) {
+  //          $("#instructor").html(result[0]+' is ' + result[1]+' Years Old !!! ');
+ //
+   //     } else 
+    //        console.log(error);
+   // });
+
+    detailerEvent.watch(function(error,result){
+        if (!error){
+            $("#loader").hide();
+            $("#instructor").html(result.args.name + ' with Event and Age with Event is '+ result.args.age);
+        } else
+            $("#loader").hide();
+            console.log(error);
+        });
+
+
+    $('#button').click(function(){
+        AnoopDets.setDets($("#name").val(),$("#age").val(),(err,res) => {
+            if (err) {
+                $("#loader").hide();
+                $("#instructor").html('Wrong Owner !!!');
+                console.log('Wrong Contract Owner');                
+            }
+        });
+        $("#loader").show();
+    });
+
+    
+
+    </script>
+
+</body>
+</html>
